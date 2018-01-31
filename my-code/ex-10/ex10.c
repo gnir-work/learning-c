@@ -11,12 +11,10 @@ int main(int argc, char* argv[]) {
 	for(j = 1; j < argc; j++) {
 		printf("Working on word '%s'.\n", argv[j]);
 		char letter = argv[j][0];
-		for (i = 0; argv[j][i] != '\0'; i++, letter = argv[1][i]) {
-			printf("%d", i);
+		for (i = 0; argv[j][i] != '\0'; i++, letter = argv[j][i]) {
 			if (letter < 97) {
 				letter += distance_between_upper_and_lower;
 			}
-			printf("------%c-----", letter);
 			switch(letter) {
 				case 'a':
 					printf("%d: 'A'\n", i);
