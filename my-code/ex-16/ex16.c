@@ -3,8 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define MAX_NAME_LENGTH 10
+
 struct Person {
-	char *name;
+	char name[MAX_NAME_LENGTH];
 	int age;
 	int height;
 	int weight;
@@ -13,10 +15,10 @@ struct Person {
 /**
  * Creates a person struct and returns a pointer to it.
  */
-struct Person Person_create(char *name, int age, int height, int weight) {
+struct Person Person_create(const char *name, int age, int height, int weight) {
 	struct Person who;
 
-	who.name = strdup(name);
+	strncpy(who.name, name, MAX_NAME_LENGTH);
 	who.age = age;
 	who.height = height;
 	who.weight = weight;
@@ -29,9 +31,6 @@ struct Person Person_create(char *name, int age, int height, int weight) {
  * pointer who points to.
  * NOTE: we need to free first the the memory which Person->name points to.
  */
-void Person_destroy(struct Person who) {
-	free(who.name);
-}
 
 /**
  * Prints out the properties of the struct Person.
@@ -73,10 +72,6 @@ int main(int argc, char *argv[]) {
 
 	printf("Oshrit is at %p in my memory.\n", &oshrit);
 	Person_print(oshrit);	
-
-	//Destroy them!
-	Person_destroy(nir);
-	Person_destroy(oshrit);
 
 	return 0;
 }
