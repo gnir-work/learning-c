@@ -27,12 +27,6 @@ struct Person Person_create(const char *name, int age, int height, int weight) {
 }
 
 /**
- * Frees the memory allocated by the struct of type Person which the
- * pointer who points to.
- * NOTE: we need to free first the the memory which Person->name points to.
- */
-
-/**
  * Prints out the properties of the struct Person.
  */
 void Person_print(struct Person who) {
