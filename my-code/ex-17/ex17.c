@@ -23,6 +23,11 @@ struct Connection {
 	struct Database *db;
 };
 
+/**
+ * Close the connection to the database.
+ * Which in practice means freeing the space allocated
+ * for The Database struct and clossing the db file.
+ */
 void Database_close(struct Connection *conn) {
 	if (conn) {
 		if (conn->db) {
@@ -35,6 +40,10 @@ void Database_close(struct Connection *conn) {
 	}
 }
 
+/**
+ * Close the database and terminate the function with
+ * an error message.
+ */
 void die(char *message, struct Connection *conn) {
 	if(conn) {
 		Database_close(conn);
@@ -48,10 +57,16 @@ void die(char *message, struct Connection *conn) {
 	exit(1);
 }
 
+/**
+ * Print out the address struct.
+ */
 void Address_print(struct Address *addr) {
 	printf("Address: %d %s %s\n", addr->id, addr->name, addr->email);
 }
 
+/**
+ * Load the database from the file
+ */
 void Database_load(struct Connection *conn) {
 	int rc = fread(conn->db, sizeof(struct Database), 1, conn->file);
 	if (rc != 1) {
@@ -59,6 +74,10 @@ void Database_load(struct Connection *conn) {
 	}
 }
 
+/**
+ * Malloc some space for the connection struct, the Database struct 
+ * and open the file used for saving the db.
+ */
 struct Connection *Database_open(const char *filename, char mode) {
 	struct Connection *conn = malloc(sizeof(struct Connection));
 	if (!conn) {
@@ -87,6 +106,9 @@ struct Connection *Database_open(const char *filename, char mode) {
 	return conn;
 }
 
+/**
+ * Write the current state of the Database struct to the file
+ */
 void Database_write(struct Connection *conn) {
 	rewind(conn->file);
 
@@ -101,6 +123,9 @@ void Database_write(struct Connection *conn) {
 	}
 }
 
+/**
+ * Initialize the db with empty rows.
+ */
 void Database_create(struct Connection *conn) {
 	int i = 0;
 
@@ -110,6 +135,11 @@ void Database_create(struct Connection *conn) {
 	}
 }
 
+/**
+ * Set a specific row in the db to the given name and email
+ * NOTE: The updated db isn't saved automatically to the file,
+ * rather Database_write should be called.
+ */
 void Database_set(struct Connection *conn, int id, const char *name, const char *email) {
 	struct Address *addr = &conn->db->rows[id];
 	if (addr->set) {
@@ -129,6 +159,9 @@ void Database_set(struct Connection *conn, int id, const char *name, const char 
 	}
 }
 
+/**
+ * Print out a row in the database.
+ */
 void Database_get(struct Connection *conn, int id) {
 	struct Address *addr = &conn->db->rows[id];
 	if (!addr->set) {
@@ -137,11 +170,17 @@ void Database_get(struct Connection *conn, int id) {
 	Address_print(addr);
 }
 
+/**
+ * Delete a row from the database
+ */
 void Database_delete(struct Connection *conn, int id) {
 	struct Address addr = {.id=id, .set=0};
 	conn->db->rows[id] = addr;
 }
 
+/**
+ * Print out all of the rows that have been set in the database.
+ */
 void Database_list(struct Connection *conn) {
 	int i = 0;
 
@@ -158,13 +197,17 @@ int main(int argc, char *argv[]) {
 	if (argc < 3) {
 		die("USAGE: ./ex17 <dbfile> <action> [action params]", NULL);
 	}
-
+	
+	//Retrieved the name of the db from the arguments
 	char *filename = argv[1];
+	//Retrieved the action from the arguments.
 	char action = argv[2][0];
+	//Created the connection struct.
 	struct Connection *conn = Database_open(filename, action);
 	int id = 0;
 
 	if (argc > 3) {
+		//Retrieved the id from the arguments, if it was given.
 		id = atoi(argv[3]);
 	}
 	if (id >= MAX_ROWS) {
