@@ -58,6 +58,26 @@ void die(char *message, struct Connection *conn) {
 }
 
 /**
+ * A wrapper for writing and reading to a file.
+ * The function wrappes the error handling.
+ */
+void write_read_to_file(int write, void *ptr, size_t size, size_t nmemb, FILE *stream, struct Connection *conn) {
+	char *message;
+	int rc;
+	if (write) {
+		rc = fwrite(ptr, size, nmemb, stream);
+		message = "Failed to write to file";
+	} else {
+		rc = fread(ptr, size, nmemb, stream);
+		message = "Failed to read from file";
+	}
+	
+	if (rc != 1) {
+		die(message, conn);
+	}
+}
+
+/**
  * Print out the address struct.
  */
 void Address_print(struct Address *addr) {
@@ -68,10 +88,7 @@ void Address_print(struct Address *addr) {
  * Load the database from the file
  */
 void Database_load(struct Connection *conn) {
-	int rc = fread(conn->db, sizeof(struct Database), 1, conn->file);
-	if (rc != 1) {
-		printf("Failed to load database!\n");
-	}
+	write_read_to_file(0, conn->db, sizeof(struct Database), 1, conn->file, conn);
 }
 
 /**
@@ -111,13 +128,8 @@ struct Connection *Database_open(const char *filename, char mode) {
  */
 void Database_write(struct Connection *conn) {
 	rewind(conn->file);
-
-	int rc = fwrite(conn->db, sizeof(struct Database), 1, conn->file);
-	if (rc != 1) {
-		die("Failed to write to file.", conn);
-	}
-
-	rc = fflush(conn->file);
+	write_read_to_file(1, conn->db, sizeof(struct Database), 1, conn->file, conn);
+	int rc = fflush(conn->file);
 	if (rc == -1) {
 		die("Cannot flush the file.", conn);
 	}
@@ -195,6 +207,8 @@ void Database_list(struct Connection *conn) {
 		}
 	}
 }
+
+
 
 int main(int argc, char *argv[]) {
 	if (argc < 3) {
